@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+sqlite3 # stdlib, but included for clarity
+requests
+# Placeholders for hackathon APIs
+exa # TODO: replace with actual package if available
+crewai # TODO: replace with actual package if available
+wandb # For W&B Weave integration 
