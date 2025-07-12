@@ -3,12 +3,12 @@
 ---
 
 ## Hackathon Eligibility Requirements (WeaveHacks)
-- [ ] Code is in a public GitHub repo
-- [ ] Entire project built at the hackathon (no prior work)
-- [ ] Work is primarily our own
+- [x] Code is in a public GitHub repo
+- [x] Entire project built at the hackathon (no prior work)
+- [x] Work is primarily our own
 - [ ] Project uses W&B Weave (at least 2 lines of code)
-- [ ] Team present in-person for creation and demo
-- [ ] No team members work for sponsor orgs
+- [x] Team present in-person for creation and demo
+- [x] No team members work for sponsor orgs
 
 ---
 
@@ -34,31 +34,19 @@ LinkLine is an AI-powered tool designed to automate participant recruitment for 
 - Focus on core MVP functionality
 - Prioritize working demo over comprehensive features
 
-## Key Challenges and Analysis
-
-### Technical Challenges
-1. **Integration Complexity**: Coordinating multiple AI agents (SearchAgent, OutreachAgent, SchedulerAgent) using CrewAI
-2. **Web Automation**: Using BrowserBase to send messages and fill forms across different platforms
-3. **Search Quality**: Leveraging Exa to find relevant participants based on research criteria
-4. **Data Management**: Storing and tracking research studies, participants, and outreach history in SQLite
-
-### Business Challenges
-1. **Message Personalization**: Creating compelling outreach messages that convert to appointments
-2. **Platform Diversity**: Handling different contact methods (DMs, contact forms, emails)
-3. **Scheduling Coordination**: Integrating with Calendly for appointment booking
-4. **Success Tracking**: Measuring recruitment effectiveness and participant quality
+---
 
 ## High-level Task Breakdown
 
 ### Phase 1: Core MVP Setup (Day 1 - Morning)
-- [ ] **Task 1.1**: Initialize project structure and dependencies
+- [x] **Task 1.1**: Initialize project structure and dependencies
   - Success Criteria: All folders created, requirements.txt with necessary packages
-- [ ] **Task 1.2**: Set up SQLite database with basic schema
+- [x] **Task 1.2**: Set up SQLite database with basic schema
   - Success Criteria: Database with research_studies and participants tables
-- [ ] **Task 1.3**: Create basic HTML form for research input
+- [x] **Task 1.3**: Create basic HTML form for research input
   - Success Criteria: Form with title, description, inclusion/exclusion criteria fields
-- [ ] **Task 1.4**: Implement basic backend endpoint
-  - Success Criteria: FastAPI endpoint that saves research data to database
+- [x] **Task 1.4**: Implement basic backend endpoint
+  - Success Criteria: Flask endpoint that saves research data to database
 
 ### Phase 2: Participant Discovery (Day 1 - Afternoon)
 - [ ] **Task 2.1**: Implement basic Exa integration
@@ -81,16 +69,19 @@ LinkLine is an AI-powered tool designed to automate participant recruitment for 
 - [ ] **Stretch 2**: Simple scheduling link integration
 - [ ] **Stretch 3**: Basic participant filtering/ranking
 
+---
+
 ## Project Status Board
 
 ### Current Sprint: Phase 1 - Core MVP Setup (Day 1 - Morning)
-- [ ] Project structure initialization
-- [ ] Database setup with basic schema
-- [ ] Basic frontend form (title, description, inclusion/exclusion criteria)
-- [ ] Backend API endpoint
+- [x] Project structure initialization
+- [x] Database setup with basic schema
+- [x] Basic frontend form (title, description, inclusion/exclusion criteria)
+- [x] Backend API endpoint (Flask)
 
 ### Completed Tasks
-*None yet*
+- Project skeleton and initial commit complete
+- Switched backend framework from FastAPI to Flask
 
 ### In Progress
 *None yet*
@@ -99,13 +90,18 @@ LinkLine is an AI-powered tool designed to automate participant recruitment for 
 *None yet*
 
 ### Timeline
-- **Day 1 Morning**: Core setup and basic form
+- **Day 1 Morning**: Core setup and basic form (done)
 - **Day 1 Afternoon**: Participant discovery with Exa
 - **Day 2**: Polish and demo preparation
 
+---
+
 ## Executor's Feedback or Assistance Requests
 
-*This section will be updated by the Executor during implementation*
+- Project skeleton and initial commit are complete. Ready for parallel development.
+- Backend will use Flask instead of FastAPI (update requirements and boilerplate as needed).
+
+---
 
 ## Lessons
 
@@ -118,12 +114,16 @@ LinkLine is an AI-powered tool designed to automate participant recruitment for 
 ### Project-Specific Lessons
 *To be populated during development*
 
+---
+
 ## Next Steps
 
-1. **Immediate (Day 1 Morning)**: Set up project structure and basic form
-2. **Short-term (Day 1 Afternoon)**: Implement Exa search and participant discovery
-3. **Medium-term (Day 2)**: Polish UI and prepare demo
-4. **Stretch Goals**: Basic outreach and scheduling if time permits
+1. Update backend boilerplate and requirements for Flask
+2. Push repo to GitHub if not already done
+3. Assign tasks for parallel development
+4. Begin implementing MVP features
+
+---
 
 ## MVP Scope (Hackathon Focus)
 
@@ -138,6 +138,8 @@ LinkLine is an AI-powered tool designed to automate participant recruitment for 
 - Scheduling integration
 - Payment processing
 - Advanced filtering/ranking
+
+---
 
 ## Success Metrics
 

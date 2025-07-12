@@ -1,5 +1,4 @@
-fastapi
-uvicorn
+flask
 sqlite3 # stdlib, but included for clarity
 requests
 # Placeholders for hackathon APIs
