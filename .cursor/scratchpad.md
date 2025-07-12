@@ -47,6 +47,8 @@ LinkLine is an AI-powered tool designed to automate participant recruitment for 
   - Success Criteria: Form with title, description, inclusion/exclusion criteria fields
 - [x] **Task 1.4**: Implement basic backend endpoint
   - Success Criteria: Flask endpoint that saves research data to database
+- [x] **Task 1.5**: Refactor to Flask app structure with app/, agents/, db/, static/, templates/, and run.py entrypoint
+  - Success Criteria: All code and files migrated, old files removed, new structure committed
 
 ### Phase 2: Participant Discovery (Day 1 - Afternoon)
 - [ ] **Task 2.1**: Implement basic Exa integration
@@ -78,10 +80,12 @@ LinkLine is an AI-powered tool designed to automate participant recruitment for 
 - [x] Database setup with basic schema
 - [x] Basic frontend form (title, description, inclusion/exclusion criteria)
 - [x] Backend API endpoint (Flask)
+- [x] Refactor to Flask app structure and migrate all files
 
 ### Completed Tasks
 - Project skeleton and initial commit complete
 - Switched backend framework from FastAPI to Flask
+- Migrated to new Flask-based app structure with agents, db, static, templates, and run.py
 
 ### In Progress
 *None yet*
@@ -98,8 +102,8 @@ LinkLine is an AI-powered tool designed to automate participant recruitment for 
 
 ## Executor's Feedback or Assistance Requests
 
-- Project skeleton and initial commit are complete. Ready for parallel development.
-- Backend will use Flask instead of FastAPI (update requirements and boilerplate as needed).
+- Project structure now matches Flask best practices and is ready for parallel development.
+- Next: Implement form submission endpoint and database integration.
 
 ---
 
@@ -118,10 +122,10 @@ LinkLine is an AI-powered tool designed to automate participant recruitment for 
 
 ## Next Steps
 
-1. Update backend boilerplate and requirements for Flask
-2. Push repo to GitHub if not already done
-3. Assign tasks for parallel development
-4. Begin implementing MVP features
+1. Implement form submission endpoint in Flask (POST /submit)
+2. Connect form to database and store research study data
+3. Begin Exa integration for participant discovery
+4. Assign tasks for parallel development
 
 ---
 
