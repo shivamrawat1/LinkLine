@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LinkLine – Participant Recruitment</title>
+  <title>LinkLine – AI-Powered Participant Recruitment</title>
   <style>
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      max-width: 800px;
+      max-width: 900px;
       margin: 0 auto;
       padding: 20px;
       background-color: #f5f5f5;
@@ -24,6 +24,7 @@
       padding: 30px;
       border-radius: 8px;
       box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
     }
     
     label {
@@ -69,17 +70,150 @@
     button:active {
       transform: translateY(1px);
     }
+    
+    button:disabled {
+      background-color: #6c757d;
+      cursor: not-allowed;
+    }
+    
+    #loading-screen {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.8);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+    
+    .loading-content {
+      background: white;
+      padding: 40px;
+      border-radius: 8px;
+      text-align: center;
+      max-width: 400px;
+    }
+    
+    .spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #007bff;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 20px;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .error-message {
+      background-color: #f8d7da;
+      color: #721c24;
+      padding: 15px;
+      border-radius: 4px;
+      margin-top: 20px;
+    }
   </style>
 </head>
 <body>
   <h1>LinkLine: AI-Powered Participant Recruitment</h1>
+  
   <div id="form-container">
-    <form id="research-form" method="post" action="/submit">
+    <form id="research-form">
       <label for="description">Study Description:</label>
       <textarea id="description" name="description" placeholder="Please describe your research study, including the purpose, methodology, and any specific requirements for participants..." required></textarea>
-      <button type="submit">Submit Study</button>
+      <button type="submit" id="submit-btn">Find Participants</button>
     </form>
   </div>
-  <script src="{{ url_for('static', filename='script.js') }}"></script>
+  
+  <div id="loading-screen">
+    <div class="loading-content">
+      <div class="spinner"></div>
+      <h3>Searching for Participants...</h3>
+      <p>Our AI is analyzing your study description and searching for potential participants. This may take a few moments.</p>
+    </div>
+  </div>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('research-form');
+        const submitBtn = document.getElementById('submit-btn');
+        const loadingScreen = document.getElementById('loading-screen');
+
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const description = document.getElementById('description').value.trim();
+            if (!description) {
+                alert('Please enter a study description');
+                return;
+            }
+
+            // Show loading screen
+            loadingScreen.style.display = 'flex';
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Searching...';
+
+            // Create form data
+            const formData = new FormData();
+            formData.append('description', description);
+
+            // Send AJAX request
+            fetch('/submit', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Hide loading screen
+                loadingScreen.style.display = 'none';
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Find Participants';
+
+                if (data.success) {
+                    // Redirect to results page
+                    window.location.href = data.redirect;
+                } else {
+                    showError(data.error || 'An error occurred while searching for participants');
+                }
+            })
+            .catch(error => {
+                // Hide loading screen
+                loadingScreen.style.display = 'none';
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Find Participants';
+
+                console.error('Error:', error);
+                showError('An error occurred while searching for participants');
+            });
+        });
+
+        function showError(message) {
+            // Remove any existing error messages
+            const existingError = document.querySelector('.error-message');
+            if (existingError) {
+                existingError.remove();
+            }
+
+            // Create and display error message
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error-message';
+            errorDiv.textContent = message;
+
+            const formContainer = document.getElementById('form-container');
+            formContainer.appendChild(errorDiv);
+
+            // Scroll to error message
+            errorDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+    });
+  </script>
 </body>
 </html>
