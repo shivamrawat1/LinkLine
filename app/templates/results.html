@@ -11,6 +11,8 @@
       margin: 0 auto;
       padding: 20px;
       background-color: #f5f5f5;
+      min-height: 100vh;
+      box-sizing: border-box;
     }
     h1 {
       color: #333;
@@ -35,6 +37,10 @@
       padding: 30px;
       border-radius: 8px;
       box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      max-height: calc(100vh - 200px);
+      overflow-y: auto;
+      overflow-x: hidden;
+      margin-bottom: 20px;
     }
     .results-summary {
       margin-bottom: 20px;
@@ -91,11 +97,191 @@
       padding: 40px;
       color: #666;
     }
+    /* Custom scrollbar styling */
+    .results-container::-webkit-scrollbar {
+      width: 8px;
+    }
+    .results-container::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 4px;
+    }
+    .results-container::-webkit-scrollbar-thumb {
+      background: #c1c1c1;
+      border-radius: 4px;
+    }
+    .results-container::-webkit-scrollbar-thumb:hover {
+      background: #a8a8a8;
+    }
+    
+    /* Email buttons styling */
+    .email-buttons {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      margin-top: 20px;
+    }
+    
+    .compose-btn {
+      background-color: #007bff;
+      color: white;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s;
+    }
+    
+    .compose-btn:hover {
+      background-color: #0056b3;
+    }
+    
+    .send-btn {
+      background-color: #28a745;
+      color: white;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s;
+      display: none;
+    }
+    
+    .send-btn:hover {
+      background-color: #218838;
+    }
+    
+    .send-btn.show {
+      display: inline-block;
+    }
+    
+    /* Modal styling */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.5);
+    }
+    
+    .modal-content {
+      background-color: white;
+      margin: 5% auto;
+      padding: 30px;
+      border-radius: 8px;
+      width: 80%;
+      max-width: 600px;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+    
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    
+    .close {
+      color: #aaa;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    
+    .close:hover {
+      color: #000;
+    }
+    
+    .email-textarea {
+      width: 100%;
+      min-height: 300px;
+      padding: 15px;
+      border: 2px solid #ddd;
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 14px;
+      resize: vertical;
+      box-sizing: border-box;
+    }
+    
+    .email-textarea:focus {
+      outline: none;
+      border-color: #007bff;
+    }
+    
+    .modal-buttons {
+      display: flex;
+      gap: 15px;
+      justify-content: flex-end;
+      margin-top: 20px;
+    }
+    
+    .save-btn {
+      background-color: #28a745;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    
+    .save-btn:hover {
+      background-color: #218838;
+    }
+    
+    .cancel-btn {
+      background-color: #6c757d;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    
+    .cancel-btn:hover {
+      background-color: #5a6268;
+    }
+    
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 20px;
+    }
+    
+    .spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #007bff;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 10px;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .success-message {
+      background-color: #d4edda;
+      color: #155724;
+      padding: 15px;
+      border-radius: 4px;
+      margin-top: 20px;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
   <h1>LinkLine: Search Results</h1>
   <a href="/" class="back-button">← Back to Search</a>
+  
   <div class="results-container">
     {% if results %}
       <div class="results-summary">
@@ -152,5 +338,167 @@
       </div>
     {% endif %}
   </div>
+  
+  <!-- Email buttons -->
+  <div class="email-buttons">
+    <button class="compose-btn" onclick="composeEmail()">Compose Email</button>
+    <button class="send-btn" id="sendEmailsBtn" onclick="sendEmails()">Send Email to All</button>
+  </div>
+  
+  <!-- Success message -->
+  {% if email_sent %}
+    <div class="success-message">
+      <strong>✓ Emails sent successfully!</strong> All participants have been contacted.
+    </div>
+  {% endif %}
+  
+  <!-- Email Modal -->
+  <div id="emailModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Compose Recruitment Email</h3>
+        <span class="close" onclick="closeModal()">&times;</span>
+      </div>
+      
+      <div class="loading" id="emailLoading">
+        <div class="spinner"></div>
+        <p>Generating email draft...</p>
+      </div>
+      
+      <div id="emailForm" style="display: none;">
+        <label for="emailContent">Email Content:</label>
+        <textarea id="emailContent" class="email-textarea" placeholder="Email content will be generated here..."></textarea>
+        
+        <div class="modal-buttons">
+          <button class="cancel-btn" onclick="closeModal()">Cancel</button>
+          <button class="save-btn" onclick="saveEmail()">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    // Show send button if email draft exists
+    {% if email_draft %}
+      document.getElementById('sendEmailsBtn').classList.add('show');
+    {% endif %}
+    
+    function composeEmail() {
+      const modal = document.getElementById('emailModal');
+      const loading = document.getElementById('emailLoading');
+      const form = document.getElementById('emailForm');
+      
+      modal.style.display = 'block';
+      loading.style.display = 'block';
+      form.style.display = 'none';
+      
+      // Generate email draft
+      fetch('/compose-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        loading.style.display = 'none';
+        form.style.display = 'block';
+        
+        if (data.success) {
+          document.getElementById('emailContent').value = data.email_content;
+        } else {
+          alert('Error generating email: ' + data.error);
+          closeModal();
+        }
+      })
+      .catch(error => {
+        loading.style.display = 'none';
+        alert('Error generating email: ' + error);
+        closeModal();
+      });
+    }
+    
+    function closeModal() {
+      document.getElementById('emailModal').style.display = 'none';
+    }
+    
+    function saveEmail() {
+      const emailContent = document.getElementById('emailContent').value;
+      
+      if (!emailContent.trim()) {
+        alert('Please enter email content');
+        return;
+      }
+      
+      fetch('/save-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email_content: emailContent
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          // Show send button
+          document.getElementById('sendEmailsBtn').classList.add('show');
+          closeModal();
+          alert('Email draft saved successfully!');
+        } else {
+          alert('Error saving email: ' + data.error);
+        }
+      })
+      .catch(error => {
+        alert('Error saving email: ' + error);
+      });
+    }
+    
+    function sendEmails() {
+      if (!confirm('Are you sure you want to send emails to all participants?')) {
+        return;
+      }
+      
+      const sendBtn = document.getElementById('sendEmailsBtn');
+      const originalText = sendBtn.textContent;
+      
+      sendBtn.textContent = 'Sending...';
+      sendBtn.disabled = true;
+      
+      fetch('/send-emails', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        sendBtn.textContent = originalText;
+        sendBtn.disabled = false;
+        
+        if (data.success) {
+          alert(`Successfully sent ${data.sent_count} emails. ${data.failed_count} failed.`);
+          // Reload page to show success message
+          window.location.reload();
+        } else {
+          alert('Error sending emails: ' + data.error);
+        }
+      })
+      .catch(error => {
+        sendBtn.textContent = originalText;
+        sendBtn.disabled = false;
+        alert('Error sending emails: ' + error);
+      });
+    }
+    
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+      const modal = document.getElementById('emailModal');
+      if (event.target === modal) {
+        closeModal();
+      }
+    }
+  </script>
 </body>
 </html> 

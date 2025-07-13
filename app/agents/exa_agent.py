@@ -74,7 +74,7 @@ def search_participants(study_description):
         params=CreateWebsetParameters(
             search={
                 "query": search_query,
-                "count": 30
+                "count": 5
             },
             enrichments=[
                 CreateEnrichmentParameters(
