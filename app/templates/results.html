@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LinkLine – Search Results</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    h1 {
+      color: #333;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .back-button {
+      background-color: #6c757d;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      text-decoration: none;
+      display: inline-block;
+      margin-bottom: 20px;
+    }
+    .back-button:hover {
+      background-color: #5a6268;
+    }
+    .results-container {
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .results-summary {
+      margin-bottom: 20px;
+      padding: 15px;
+      background-color: #e9ecef;
+      border-radius: 4px;
+      text-align: center;
+    }
+    .results-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    .results-table th {
+      background-color: #007bff;
+      color: white;
+      padding: 12px;
+      text-align: left;
+      font-weight: 600;
+    }
+    .results-table td {
+      padding: 12px;
+      border-bottom: 1px solid #ddd;
+    }
+    .results-table tr:nth-child(even) {
+      background-color: #f8f9fa;
+    }
+    .results-table tr:hover {
+      background-color: #e9ecef;
+    }
+    .email-link {
+      color: #007bff;
+      text-decoration: none;
+    }
+    .email-link:hover {
+      text-decoration: underline;
+    }
+    .linkedin-link {
+      color: #0077b5;
+      text-decoration: none;
+    }
+    .linkedin-link:hover {
+      text-decoration: underline;
+    }
+    .phone-link {
+      color: #28a745;
+      text-decoration: none;
+    }
+    .phone-link:hover {
+      text-decoration: underline;
+    }
+    .no-results {
+      text-align: center;
+      padding: 40px;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <h1>LinkLine: Search Results</h1>
+  <a href="/" class="back-button">← Back to Search</a>
+  <div class="results-container">
+    {% if results %}
+      <div class="results-summary">
+        <h3>Found {{ results.total_results }} Potential Participants</h3>
+      </div>
+      
+      {% if results.participants %}
+        <table class="results-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>LinkedIn</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for participant in results.participants %}
+              <tr>
+                <td>{{ participant.name }}</td>
+                <td>
+                  {% if participant.email != 'Not found' %}
+                    <a href="mailto:{{ participant.email }}" class="email-link">{{ participant.email }}</a>
+                  {% else %}
+                    Not found
+                  {% endif %}
+                </td>
+                <td>
+                  {% if participant.phone != 'Not found' %}
+                    <a href="tel:{{ participant.phone }}" class="phone-link">{{ participant.phone }}</a>
+                  {% else %}
+                    Not found
+                  {% endif %}
+                </td>
+                <td>
+                  {% if participant.linkedin != 'Not found' %}
+                    <a href="{{ participant.linkedin }}" target="_blank" class="linkedin-link">View Profile</a>
+                  {% else %}
+                    Not found
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <div class="no-results">
+          <p>No participants found matching your search criteria.</p>
+        </div>
+      {% endif %}
+    {% else %}
+      <div class="no-results">
+        <p>No search results available. Please go back and perform a search.</p>
+      </div>
+    {% endif %}
+  </div>
+</body>
+</html> 
