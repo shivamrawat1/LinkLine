@@ -1,0 +1,69 @@
+{
+    "email_contexts": [
+        {
+            "trigger_keywords": [
+                "study",
+                "research",
+                "participate",
+                "survey",
+                "interview"
+            ],
+            "response_template": "Thank you for your interest in our research study. We have received your inquiry and will get back to you within 24-48 hours with more details about participation requirements and scheduling. If you have any urgent questions, please feel free to reply to this email.",
+            "subject": "Research Study Inquiry - Thank You"
+        },
+        {
+            "trigger_keywords": [
+                "question",
+                "clarification",
+                "help",
+                "support"
+            ],
+            "response_template": "Thank you for reaching out. We appreciate your question and will provide a detailed response within the next business day. If this is urgent, please include 'URGENT' in your subject line for faster response.",
+            "subject": "Question Received - We'll Get Back to You"
+        },
+        {
+            "trigger_keywords": [
+                "withdraw",
+                "cancel",
+                "opt out",
+                "unsubscribe"
+            ],
+            "response_template": "We have received your request to withdraw from our research study. You have been successfully removed from our participant list. Thank you for your time and participation. If you change your mind, you can always reach out to us again.",
+            "subject": "Withdrawal Confirmation"
+        },
+        {
+            "trigger_keywords": [
+                "schedule",
+                "appointment",
+                "meeting",
+                "time"
+            ],
+            "response_template": "Thank you for your scheduling inquiry. We will contact you within 24 hours to confirm your appointment time and provide any necessary preparation instructions. Please let us know if you need to reschedule.",
+            "subject": "Scheduling Request Received"
+        },
+        {
+            "trigger_keywords": [
+                "payment",
+                "compensation",
+                "money",
+                "reward"
+            ],
+            "response_template": "Thank you for your inquiry about compensation. We provide fair compensation for all research participants. Details about payment structure and timing will be provided during your first session. If you have specific questions about compensation, please let us know.",
+            "subject": "Compensation Inquiry - Thank You"
+        }
+    ],
+    "default_response": {
+        "subject": "Thank You for Your Message",
+        "template": "Thank you for contacting us. We have received your message and will respond with more detailed information within 24-48 hours. If this is urgent, please reply with 'URGENT' in the subject line."
+    },
+    "auto_reply_settings": {
+        "enabled": true,
+        "check_interval_minutes": 5,
+        "max_replies_per_email": 1,
+        "exclude_senders": [
+            "noreply@",
+            "no-reply@",
+            "donotreply@"
+        ]
+    }
+}

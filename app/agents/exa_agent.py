@@ -6,6 +6,11 @@ import os
 import json
 import time
 import asyncio
+import weave
+weave.init("LinkLine")
+
+load_dotenv()
+
 
 def setup_gemini():
     """Setup Gemini API"""

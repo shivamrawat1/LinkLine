@@ -4,6 +4,11 @@ from app.agents.compose_email import compose_recruitment_email
 from app.gmail_service import GmailService
 from app import app
 import os
+import sys
+import asyncio
+import subprocess
+import threading
+import time
 from google_auth_oauthlib.flow import Flow
 from google.oauth2.credentials import Credentials
 import os
@@ -11,6 +16,10 @@ os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 
 GOOGLE_CLIENT_SECRETS_FILE = "credentials.json"
 SCOPES = ["https://www.googleapis.com/auth/gmail.send"]
+
+# Global variable to track email reply server process
+email_reply_server_process = None
+email_reply_server_active = False
 
 @app.route("/")
 def home():
@@ -141,6 +150,71 @@ def get_gmail_credentials_from_session():
         scopes=creds_dict['scopes']
     )
 
+def start_email_reply_server(credentials):
+    """Start the email reply MCP server in a separate process"""
+    global email_reply_server_process, email_reply_server_active
+    
+    if email_reply_server_active:
+        return "Email reply server is already running"
+    
+    try:
+        # Start the MCP server process
+        server_script = os.path.join(os.path.dirname(__file__), "agents", "email_reply_server.py")
+        email_reply_server_process = subprocess.Popen(
+            [sys.executable, server_script],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            stdin=subprocess.PIPE
+        )
+        
+        # Wait a moment for the server to start
+        time.sleep(2)
+        
+        if email_reply_server_process.poll() is None:
+            email_reply_server_active = True
+            return "Email reply server started successfully"
+        else:
+            return "Failed to start email reply server"
+            
+    except Exception as e:
+        return f"Error starting email reply server: {str(e)}"
+
+def stop_email_reply_server():
+    """Stop the email reply MCP server"""
+    global email_reply_server_process, email_reply_server_active
+    
+    if not email_reply_server_active:
+        return "Email reply server is not running"
+    
+    try:
+        if email_reply_server_process:
+            email_reply_server_process.terminate()
+            email_reply_server_process.wait(timeout=5)
+        email_reply_server_active = False
+        return "Email reply server stopped successfully"
+    except Exception as e:
+        return f"Error stopping email reply server: {str(e)}"
+
+def initialize_email_reply_server(credentials):
+    """Initialize the email reply server with Gmail credentials"""
+    try:
+        # Convert credentials to dict format for MCP server
+        creds_dict = {
+            'token': credentials.token,
+            'refresh_token': credentials.refresh_token,
+            'token_uri': credentials.token_uri,
+            'client_id': credentials.client_id,
+            'client_secret': credentials.client_secret,
+            'scopes': credentials.scopes
+        }
+        
+        # Here you would typically communicate with the MCP server
+        # For now, we'll just start the server and it will initialize when needed
+        return start_email_reply_server(credentials)
+        
+    except Exception as e:
+        return f"Error initializing email reply server: {str(e)}"
+
 @app.route("/send-emails", methods=["POST"])
 def send_emails():
     credentials = get_gmail_credentials_from_session()
@@ -167,35 +241,47 @@ def send_emails():
     try:
         send_results = GmailService.send_bulk_emails_with_credentials(credentials, participants, subject, email_body)
         session['email_sent'] = True
+        
+        # Start email reply server after successfully sending emails
+        email_reply_status = initialize_email_reply_server(credentials)
+        
         return jsonify({
             "success": True,
             "sent_count": send_results['sent_count'],
             "failed_count": send_results['failed_count'],
             "errors": send_results['errors'],
-            "message": f"Successfully sent {send_results['sent_count']} emails. {send_results['failed_count']} failed."
+            "message": f"Successfully sent {send_results['sent_count']} emails. {send_results['failed_count']} failed.",
+            "email_reply_server": email_reply_status
         })
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@app.route("/check-auth")
-def check_auth():
-    """Check if user is authenticated with Gmail"""
-    if 'credentials' in session:
-        try:
-            # Try to build service to verify credentials are valid
-            service = build('gmail', 'v1', credentials=get_gmail_credentials_from_session())
-            return jsonify({"authenticated": True})
-        except Exception as e:
-            # Clear invalid credentials
-            session.pop('credentials', None)
-            return jsonify({"authenticated": False})
-    return jsonify({"authenticated": False})
+@app.route("/email-reply/status", methods=["GET"])
+def get_email_reply_status():
+    """Get the status of the email reply server"""
+    global email_reply_server_active, email_reply_server_process
+    
+    status = {
+        "active": email_reply_server_active,
+        "process_running": email_reply_server_process is not None and email_reply_server_process.poll() is None if email_reply_server_process else False
+    }
+    
+    return jsonify(status)
 
-@app.route("/logout")
-def logout():
-    """Clear authentication credentials"""
-    session.pop('credentials', None)
-    session.pop('state', None)
-    return redirect(url_for('home'))
+@app.route("/email-reply/start", methods=["POST"])
+def start_email_reply():
+    """Manually start the email reply server"""
+    credentials = get_gmail_credentials_from_session()
+    if not credentials:
+        return jsonify({"error": "Authentication required"}), 401
+    
+    status = initialize_email_reply_server(credentials)
+    return jsonify({"message": status})
+
+@app.route("/email-reply/stop", methods=["POST"])
+def stop_email_reply():
+    """Manually stop the email reply server"""
+    status = stop_email_reply_server()
+    return jsonify({"message": status})
 
 
