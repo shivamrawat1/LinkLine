@@ -57,17 +57,44 @@ pip install -r requirements.txt
 EXA_API_KEY=your_exa_api_key_here
 GEMINI_API_KEY=your_gemini_api_key_here
 
-# Email Configuration (for sending emails to participants)
-EMAIL_ADDRESS=your_email@gmail.com
-EMAIL_PASSWORD=your_app_password_here
-SMTP_SERVER=smtp.gmail.com
-SMTP_PORT=587
+# Email Configuration (Gmail API)
+# For Gmail API setup, see the Gmail API Setup section below
 
 # Flask Configuration
 FLASK_SECRET_KEY=your_secret_key_here
 ```
 
-**Note**: For Gmail, you'll need to use an App Password instead of your regular password. [Learn how to create an App Password](https://support.google.com/accounts/answer/185833).
+### Gmail API Setup
+
+This application uses Gmail API for sending emails, which provides better security and reliability than SMTP.
+
+#### Step 1: Create Google Cloud Project
+1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+2. Create a new project or select an existing one
+3. Enable the Gmail API for your project:
+   - Go to "APIs & Services" > "Library"
+   - Search for "Gmail API"
+   - Click "Enable"
+
+#### Step 2: Create OAuth 2.0 Credentials
+1. Go to "APIs & Services" > "Credentials"
+2. Click "Create Credentials" > "OAuth 2.0 Client IDs"
+3. Choose "Desktop application" as the application type
+4. Download the JSON credentials file
+5. Save it as `credentials.json` in the project root directory
+
+#### Step 3: Test the Setup
+Run the setup script to test your Gmail API configuration:
+```bash
+python setup_gmail.py
+```
+
+This will:
+- Check for the credentials file
+- Authenticate with Gmail API
+- Save authentication tokens for future use
+
+**Note**: On first run, you'll be prompted to authorize the application in your browser.
 
 ### Running the Application
 
@@ -158,7 +185,7 @@ LinkLine/
 - **Backend**: Flask, Python
 - **AI Processing**: Google Gemini API (Crew AI)
 - **Search**: Exa API
-- **Email**: SMTP with Gmail integration
+- **Email**: Gmail API with OAuth2 authentication
 - **Frontend**: HTML5, CSS3, JavaScript
 - **Styling**: Custom CSS with modern design principles
 

@@ -9,3 +9,7 @@ __pycache__/
 *.pyz
 *.pywz
 linkline.db
+
+# Gmail API credentials
+credentials.json
+token.pickle
