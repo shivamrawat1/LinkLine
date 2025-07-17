@@ -11,9 +11,9 @@ import threading
 import time
 from google_auth_oauthlib.flow import Flow
 from google.oauth2.credentials import Credentials
-import os
-os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
+import datetime
 
+os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 GOOGLE_CLIENT_SECRETS_FILE = "credentials.json"
 SCOPES = ["https://www.googleapis.com/auth/gmail.send"]
 
@@ -21,9 +21,20 @@ SCOPES = ["https://www.googleapis.com/auth/gmail.send"]
 email_reply_server_process = None
 email_reply_server_active = False
 
+# Server start time to track restarts
+SERVER_START_TIME = datetime.datetime.now()
+
 @app.route("/")
-def home():
-    return render_template("index.html")
+def index():
+    credentials = session.get("credentials")
+    if credentials:
+        return render_template("index.html", user=credentials)
+    else:
+        return redirect(url_for("login"))  # redirect to login if not signed in
+
+@app.route("/login")
+def login():
+    return render_template("login.html")
 
 @app.route("/submit", methods=["POST"])
 def submit_study():
@@ -39,6 +50,7 @@ def submit_study():
         # Store results and study description in session for the results page
         session['search_results'] = results
         session['study_description'] = description
+        session['search_time'] = datetime.datetime.now().isoformat()
         
         return jsonify({
             "success": True,
@@ -51,16 +63,43 @@ def submit_study():
 @app.route("/results")
 def show_results():
     """Display search results page"""
+    # Check if session is still valid (not expired due to server restart)
+    if 'search_time' not in session:
+        # Session expired, redirect to home
+        return redirect(url_for('home'))
+    
     results = session.get('search_results', None)
     study_description = session.get('study_description', None)
     email_draft = session.get('email_draft', None)
     email_sent = session.get('email_sent', False)
-    # Always render with these variables for the new flow
+    credentials = session.get('credentials', None)
+    
+    # Check if user is authenticated and credentials are valid
+    is_authenticated = False
+    auth_needed_reason = None
+    
+    if credentials:
+        # Check if credentials are from before server restart
+        if 'auth_time' in credentials:
+            auth_time = datetime.datetime.fromisoformat(credentials['auth_time'])
+            if auth_time < SERVER_START_TIME:
+                # Credentials are from before server restart, clear them
+                session.pop('credentials', None)
+                auth_needed_reason = "server_restart"
+            else:
+                is_authenticated = True
+        else:
+            # Old format credentials without timestamp, clear them
+            session.pop('credentials', None)
+            auth_needed_reason = "invalid_format"
+    
     return render_template("results.html", 
                          results=results, 
                          study_description=study_description,
                          email_draft=email_draft,
-                         email_sent=email_sent)
+                         email_sent=email_sent,
+                         is_authenticated=is_authenticated,
+                         auth_needed_reason=auth_needed_reason)
 
 @app.route("/compose-email", methods=["POST"])
 def compose_email():
@@ -105,12 +144,17 @@ def save_email():
 
 @app.route("/start-auth", methods=["GET", "POST"])
 def start_auth():
+    
     flow = Flow.from_client_secrets_file(
         GOOGLE_CLIENT_SECRETS_FILE,
         scopes=SCOPES,
         redirect_uri=url_for('oauth2callback', _external=True)
     )
-    auth_url, state = flow.authorization_url(access_type='offline', include_granted_scopes='true')
+    auth_url, state = flow.authorization_url(
+        access_type='offline', 
+        include_granted_scopes='true',
+        prompt='consent'  # Force consent screen to show
+    )
     print(auth_url)
     session['state'] = state
     return redirect(auth_url)
@@ -126,29 +170,83 @@ def oauth2callback():
     )
     flow.fetch_token(authorization_response=request.url)
     credentials = flow.credentials
-    # Store as dict, not pickled object
+    
+    # Store credentials with timestamp
     session['credentials'] = {
         'token': credentials.token,
         'refresh_token': credentials.refresh_token,
         'token_uri': credentials.token_uri,
         'client_id': credentials.client_id,
         'client_secret': credentials.client_secret,
-        'scopes': credentials.scopes
+        'scopes': credentials.scopes,
+        'auth_time': datetime.datetime.now().isoformat()
     }
-    return "authenticated is complete"
+    
+    # Redirect back to results page
+    return redirect(url_for('index'))
+
+@app.route("/logout")
+def logout():
+    # Alternative way to remove specific keys
+    if 'credentials' in session:
+        del session['credentials']
+
+    # Method 2: Clear everything else
+    session.clear()
+    
+    # Method 3: Force session save
+    session.modified = True
+    
+    return redirect(url_for("login"))
+
+
+@app.route("/auth-status")
+def auth_status():
+    """Check authentication status"""
+    credentials = get_gmail_credentials_from_session()
+    is_authenticated = credentials is not None
+    
+    return jsonify({
+        "authenticated": is_authenticated,
+        "auth_url": url_for('start_auth', _external=True) if not is_authenticated else None
+    })
 
 def get_gmail_credentials_from_session():
+    """Get Gmail credentials from session, checking for expiration"""
     creds_dict = session.get('credentials')
     if not creds_dict:
         return None
-    return Credentials(
-        creds_dict['token'],
-        refresh_token=creds_dict.get('refresh_token'),
-        token_uri=creds_dict['token_uri'],
-        client_id=creds_dict['client_id'],
-        client_secret=creds_dict['client_secret'],
-        scopes=creds_dict['scopes']
-    )
+    
+    # Check if credentials are from before server restart
+    if 'auth_time' in creds_dict:
+        try:
+            auth_time = datetime.datetime.fromisoformat(creds_dict['auth_time'])
+            if auth_time < SERVER_START_TIME:
+                # Credentials are from before server restart, clear them
+                session.pop('credentials', None)
+                return None
+        except (ValueError, TypeError):
+            # Invalid timestamp format, clear credentials
+            session.pop('credentials', None)
+            return None
+    else:
+        # Old format credentials without timestamp, clear them
+        session.pop('credentials', None)
+        return None
+    
+    try:
+        return Credentials(
+            creds_dict['token'],
+            refresh_token=creds_dict.get('refresh_token'),
+            token_uri=creds_dict['token_uri'],
+            client_id=creds_dict['client_id'],
+            client_secret=creds_dict['client_secret'],
+            scopes=creds_dict['scopes']
+        )
+    except (KeyError, TypeError):
+        # Invalid credentials format, clear them
+        session.pop('credentials', None)
+        return None
 
 def start_email_reply_server(credentials):
     """Start the email reply MCP server in a separate process"""
@@ -284,4 +382,15 @@ def stop_email_reply():
     status = stop_email_reply_server()
     return jsonify({"message": status})
 
-
+@app.route("/debug-session")
+def debug_session():
+    """Debug route to check session contents"""
+    session_data = dict(session)
+    # Remove sensitive data for security
+    if 'credentials' in session_data:
+        session_data['credentials'] = '***REDACTED***'
+    return jsonify({
+        "session_keys": list(session.keys()),
+        "session_data": session_data,
+        "has_credentials": 'credentials' in session
+    })

@@ -62,8 +62,23 @@ function sendEmails() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
     })
-        .then(res => res.json())
+        .then(async res => {
+            if (res.status === 401) {
+                const data = await res.json();
+                if (data.auth_url) {
+                    window.open(data.auth_url, '_blank');
+                    alert('Authentication required. Please authenticate with Google in the new tab, then refresh this page.');
+                } else {
+                    alert('Authentication required. Please authenticate again.');
+                }
+                sendBtn.textContent = originalText;
+                sendBtn.disabled = false;
+                return;
+            }
+            return res.json();
+        })
         .then(data => {
+            if (!data) return;
             sendBtn.textContent = originalText;
             sendBtn.disabled = false;
             if (data.success) {
@@ -80,7 +95,74 @@ function sendEmails() {
         });
 }
 
+function checkAuthStatus() {
+    fetch('/auth-status')
+        .then(res => res.json())
+        .then(data => {
+            const composeBtn = document.querySelector('.compose-btn');
+            const authBtn = document.getElementById('authBtn');
+            const sendBtn = document.getElementById('sendEmailsBtn');
+
+            if (data.authenticated) {
+                composeBtn.disabled = false;
+                authBtn.disabled = true;
+                sendBtn.disabled = false;
+                // Hide any auth required messages
+                const authMessages = document.querySelectorAll('.success-message');
+                authMessages.forEach(msg => {
+                    if (msg.textContent.includes('Authentication required')) {
+                        msg.style.display = 'none';
+                    }
+                });
+            } else {
+                composeBtn.disabled = true;
+                authBtn.disabled = false;
+                sendBtn.disabled = true;
+            }
+        })
+        .catch(err => console.error('Error checking auth status:', err));
+}
+
+// Close modal when clicking outside of it
 window.onclick = function (e) {
     const modal = document.getElementById('emailModal');
     if (e.target === modal) closeModal();
-}; 
+};
+
+// Ensure authentication form always opens /start-auth in a new tab
+const authForm = document.getElementById('authForm');
+if (authForm) {
+    authForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        window.open('/start-auth', '_blank');
+        // Start checking auth status periodically
+        startAuthStatusCheck();
+    });
+}
+
+// Check auth status periodically when authentication might be in progress
+let authCheckInterval = null;
+
+function startAuthStatusCheck() {
+    if (authCheckInterval) {
+        clearInterval(authCheckInterval);
+    }
+
+    authCheckInterval = setInterval(() => {
+        checkAuthStatus();
+    }, 2000); // Check every 2 seconds
+
+    // Stop checking after 5 minutes
+    setTimeout(() => {
+        if (authCheckInterval) {
+            clearInterval(authCheckInterval);
+            authCheckInterval = null;
+        }
+    }, 300000);
+}
+
+// Check auth status on page load
+document.addEventListener('DOMContentLoaded', function () {
+    checkAuthStatus();
+});
+

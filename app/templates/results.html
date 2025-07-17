@@ -63,12 +63,13 @@
 
   <!-- Email buttons -->
   <div class="email-buttons">
-    <button class="compose-btn" onclick="composeEmail()">Compose Email</button>
+    <button class="compose-btn" onclick="composeEmail()" {% if not is_authenticated %}disabled{% endif %}>Compose Email</button>
     <form id="authForm" action="/start-auth" method="GET" target="_blank">
-      <button class="auth-btn" id="authBtn" type="submit">Authenticate</button>
+      <button class="auth-btn" id="authBtn" type="submit" {% if is_authenticated %}disabled{% endif %}>Authenticate</button>
     </form>
-    <button class="send-btn" id="sendEmailsBtn" onclick="sendEmails()">Send Email to All</button>
+    <button class="send-btn" id="sendEmailsBtn" onclick="sendEmails()" {% if not is_authenticated %}disabled{% endif %}>Send Email to All</button>
   </div>
+
 
   {% if email_sent %}
     <div class="success-message">
@@ -76,11 +77,6 @@
     </div>
   {% endif %}
 
-  {% if credentials %}
-    <div class="success-message" style="background-color: #fff3cd; color: #856404;">
-      <strong>Authentication complete.</strong> Please return to your original tab and refresh the page to send emails.
-    </div>
-  {% endif %}
 
   <!-- Modal -->
   <div id="emailModal" class="modal">

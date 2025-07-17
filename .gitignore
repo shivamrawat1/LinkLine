@@ -17,3 +17,6 @@ linkline.db
 # Gmail API credentials
 credentials.json
 token.pickle
+
+# Flask session secret key
+secret_key.txt
