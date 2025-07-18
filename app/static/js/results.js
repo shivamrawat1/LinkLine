@@ -6,7 +6,7 @@ function composeEmail() {
     loading.style.display = 'block';
     form.style.display = 'none';
 
-    fetch('/compose-email', {
+    fetch('email/compose-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
     })
@@ -35,7 +35,7 @@ function closeModal() {
 function saveEmail() {
     const content = document.getElementById('emailContent').value;
     if (!content.trim()) return alert('Please enter email content');
-    fetch('/save-email', {
+    fetch('email/save-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email_content: content })
@@ -58,7 +58,7 @@ function sendEmails() {
     const originalText = sendBtn.textContent;
     sendBtn.textContent = 'Sending...';
     sendBtn.disabled = true;
-    fetch('/send-emails', {
+    fetch('email/send-emails', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
     })
@@ -96,7 +96,7 @@ function sendEmails() {
 }
 
 function checkAuthStatus() {
-    fetch('/auth-status')
+    fetch('/auth/status')
         .then(res => res.json())
         .then(data => {
             const composeBtn = document.querySelector('.compose-btn');
@@ -134,7 +134,7 @@ const authForm = document.getElementById('authForm');
 if (authForm) {
     authForm.addEventListener('submit', function (e) {
         e.preventDefault();
-        window.open('/start-auth', '_blank');
+        window.open('/auth/start_auth', '_blank');
         // Start checking auth status periodically
         startAuthStatusCheck();
     });

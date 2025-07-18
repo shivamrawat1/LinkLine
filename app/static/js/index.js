@@ -22,21 +22,28 @@ document.addEventListener('DOMContentLoaded', function () {
         formData.append('description', description);
 
         // Send AJAX request
-        fetch('/submit', {
+        fetch('study/submit', {
             method: 'POST',
             body: formData
         })
-            .then(response => response.json())
+            .then(response => {
+                if (response.status === 401) {
+                    // Authentication required, redirect to login
+                    window.location.href = '/login';
+                    return;
+                }
+                return response.json();
+            })
             .then(data => {
                 // Hide loading screen
                 loadingScreen.style.display = 'none';
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Find Participants';
 
-                if (data.success) {
+                if (data && data.success) {
                     // Redirect to results page
                     window.location.href = data.redirect;
-                } else {
+                } else if (data) {
                     showError(data.error || 'An error occurred while searching for participants');
                 }
             })

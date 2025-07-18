@@ -8,7 +8,7 @@
 </head>
 <body>
   <h1>LinkLine: Search Results</h1>
-  <a href="/" class="back-button">← Back to Search</a>
+  <a href="{{ url_for('main.index') }}" class="back-button">← Back to Search</a>
 
   <div class="results-container">
     {% if results %}
@@ -63,11 +63,8 @@
 
   <!-- Email buttons -->
   <div class="email-buttons">
-    <button class="compose-btn" onclick="composeEmail()" {% if not is_authenticated %}disabled{% endif %}>Compose Email</button>
-    <form id="authForm" action="/start-auth" method="GET" target="_blank">
-      <button class="auth-btn" id="authBtn" type="submit" {% if is_authenticated %}disabled{% endif %}>Authenticate</button>
-    </form>
-    <button class="send-btn" id="sendEmailsBtn" onclick="sendEmails()" {% if not is_authenticated %}disabled{% endif %}>Send Email to All</button>
+    <button class="compose-btn" onclick="composeEmail()">Compose Email</button>
+    <button class="send-btn" id="sendEmailsBtn" onclick="sendEmails()">Send Email to All</button>
   </div>
 
 

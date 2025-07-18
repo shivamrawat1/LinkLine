@@ -22,3 +22,6 @@ app.config['SESSION_COOKIE_SECURE'] = False  # Set to True in production with HT
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 
 from app import routes
+
+# Initialize routes and register blueprints
+routes.init_app(app)

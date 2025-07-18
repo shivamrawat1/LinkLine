@@ -25,7 +25,7 @@
     </div>
   </div>
   <div>
-    <a href="/logout">Logout</a>
+    <a href="{{ url_for('auth.logout') }}">Logout</a>
   </div>
   <script src="{{ url_for('static', filename='js/index.js') }}"></script>
 </body>
